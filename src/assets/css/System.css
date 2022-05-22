@@ -1,0 +1,81 @@
+.contentBox {
+    @apply col-span-12 sm:col-span-12 md:col-span-9 lg:col-span-10 xl:col-span-10;
+    padding-top: 15vh;
+    padding-left: 5rem;
+    padding-right: 8rem;
+    background-color: lightcyan ;
+    position: relative;
+}
+
+.createButton {
+    position: absolute !important;
+    right: 8rem;
+    top: 17vh;
+}
+
+.errorText {
+    @apply mt-1 pl-1;
+    color: red;
+    font-size: 0.75rem;
+}
+
+.styledModal {
+    position: fixed;
+    z-index: 1300;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.formModal {
+    @apply p-2 px-4 pb-8;
+    width: 55vw;
+    max-height: 90vh;
+    background-color: white;
+    border-radius: 1rem;
+    overflow-y: auto;
+}
+
+@media only screen and (min-width: 1200px) {
+    .formModal {
+        width: 40vw;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    .formModal {
+        width: 90vw;
+    }
+}
+
+.closeModalButton {
+    @apply float-right;
+    background-color: blueviolet !important;
+    color: white !important;
+    padding: 1px !important;
+}
+
+.modalHeaderText {
+    @apply pt-8 pl-5;
+    color: darkslategray;
+    font-size: 1.3rem;
+    text-align: left;
+}
+
+.tableEditIcon {
+    margin-right: 0.5rem !important;
+    background-color: gray !important;
+    border-radius: 4px !important;
+    color: white !important;
+}
+
+.tableDeleteIcon {
+    background-color: orangered !important;
+    border-radius: 4px !important;
+    color: white !important;
+}
+

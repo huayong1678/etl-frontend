@@ -1,0 +1,23 @@
+.loginBackground {
+    @apply md:col-span-4 lg:col-span-6 xl:col-span-7;
+    background-color: black;
+    height: 100vh;
+}
+
+.loginBox {
+    @apply col-span-12 md:col-span-8 lg:col-span-6 xl:col-span-5;
+    padding-top: 18vh;
+    padding-left: 5rem;
+    padding-right: 8rem;
+}
+
+.errorText {
+    @apply mt-1 pl-1;
+    color: red;
+    font-size: 0.75rem;
+}
+
+.linkText {
+    color: #1976d2;
+    text-decoration: underline;
+}

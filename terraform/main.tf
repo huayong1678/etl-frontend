@@ -164,7 +164,7 @@ resource "aws_cloudfront_distribution" "site-hosting" {
     }
   }
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = aws_s3_bucket.frontend-bucket.website_endpoint
     viewer_protocol_policy = "allow-all"

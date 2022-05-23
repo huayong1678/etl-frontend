@@ -33,11 +33,15 @@ function Pipeline() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const closeModal = () => {
+    setPipelineTemp(null)
+    setIsModalOpen(false)
+  }
 
   const [open, setOpen] = useState(false);
-  const [destinationList, setDestinationList] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const [destinationList, setDestinationList] = useState([]);
   const [sourceList, setSourceList] = useState([]);
 
   const [pipelineList, setPipelineList] = useState([]);
@@ -160,9 +164,84 @@ function Pipeline() {
       }
 
     } catch (e) {
+      toast.error(`Error`)
+    }
+  }
+
+  const editButtonHandler = (row) => {
+    setPipelineTemp(row)
+    openModal()
+  }
+
+  const editPipeline = async (newPipeline) => {
+    try {
+      const token = localStorage.getItem("cookies");
+      if (!token) {
+        navigate('/')
+      }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      axios.defaults.withCredentials = true
+
+      const res = await axios.post(`${SERVICE}/pipelines/update/${newPipeline.id}`, newPipeline)
+      if (res.status === 200) {
+        toast.success(`Edit Pipeline Success`, {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          progress: undefined,
+        })
+        const newList = [...pipelineList]
+        newList[pipelineList.indexOf(pipelineTemp)] = newPipeline
+        setPipelineList(newList)
+      } else {
+        return toast.error(`Error`)
+      }
+    } catch (e) {
+      console.log(e)
+      return toast.error(`Error`)
+    }
+  }
+
+  const deletePipeline = async () => {
+    try {
+      const token = localStorage.getItem("cookies");
+      if (!token) {
+        navigate('/')
+      }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      axios.defaults.withCredentials = true
+      const res = await axios.post(`${SERVICE}/pipelines/delete/${pipelineTemp.id}`)
+      if (res.status === 200) {
+        const newList = [...pipelineList]
+        newList.splice(pipelineList.indexOf(pipelineTemp), 1)
+        setPipelineList(newList)
+
+        toast.success(`Delete Pipeline Success`, {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          progress: undefined,
+        })
+
+        closeDialog()
+      } else {
+        toast.error(`Error`)
+      }
+    } catch (e) {
       console.log(e)
       toast.error(`Error`)
     }
+  }
+
+  const openDialog = (item) => {
+    setPipelineTemp(item)
+    setIsDialogOpen(true)
+  }
+
+  const closeDialog = () => {
+    setIsDialogOpen(false)
   }
 
   if (isLoad) {
@@ -208,20 +287,84 @@ function Pipeline() {
                     <TableCell>{getSourceDatabase(row.source)}</TableCell>
                     <TableCell>{getDestinationTag(row.dest)}</TableCell>
                     <TableCell>{getDestinationDatabase(row.dest)}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        aria-label="close"
+                        className="tableEditIcon"
+                        size="small"
+                        onClick={() => editButtonHandler(row)}
+                      >
+                        <Edit fontSize="inherit" />
+                      </IconButton>
+                      <IconButton
+                        aria-label="close"
+                        className="tableDeleteIcon"
+                        size="small"
+                        onClick={() => openDialog(row)}
+                      >
+                        <Delete fontSize="inherit" />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
         </div>
-        <CreatePipelineModal
-          isOpen={isModalOpen}
-          handleClose={() => closeModal()}
-          sourceList={sourceList}
-          destinationList={destinationList}
-          toast={toast}
-          createPipeline={(data) => createPipeline(data)}
-        />
+        <ToastContainer position="bottom-right" />
+        {isModalOpen ? (
+          <CreatePipelineModal
+            isOpen={isModalOpen}
+            handleClose={() => closeModal()}
+            sourceList={sourceList}
+            destinationList={destinationList}
+            toast={toast}
+            createPipeline={(data) => createPipeline(data)}
+            editPipeline={(newPipeline) => editPipeline(newPipeline)}
+            pipelineTemp={pipelineTemp}
+          />
+        ) : null}
+        {pipelineTemp !== null ? (
+          <Dialog
+            open={isDialogOpen}
+            onClose={closeDialog}
+          >
+            <DialogTitle>
+              {'Are you sure that you want to delete this source?'}
+            </DialogTitle>
+            <DialogContent>
+              <div className="grid grid-cols-12 text-center">
+                <DialogContentText className="col-span-12">
+                  {`Pipeline Tag : ${pipelineTemp.tag}`}
+                </DialogContentText>
+              </div>
+
+              <div className="grid grid-cols-12 text-center">
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Source Tag : ${getSourceTag(pipelineTemp.source)}`}
+                </DialogContentText>
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Source Database : ${getSourceDatabase(pipelineTemp.source)}`}
+                </DialogContentText>
+              </div>
+
+              <div className="grid grid-cols-12 text-center">
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Destination Tag: ${getDestinationTag(pipelineTemp.dest)}`}
+                </DialogContentText>
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Destination Database : ${getDestinationDatabase(pipelineTemp.dest)}`}
+                </DialogContentText>
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => closeDialog()}>Disagree</Button>
+              <Button onClick={() => deletePipeline()} autoFocus>
+                Agree
+              </Button>
+            </DialogActions>
+          </Dialog>
+        ) : null}
       </section>
     );
   } else {

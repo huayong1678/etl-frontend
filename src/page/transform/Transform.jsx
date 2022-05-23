@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 
 import {
@@ -12,6 +12,7 @@ import Sidebar from '../../component/Sidebar'
 import '../../assets/css/System.css';
 
 function Transform() {
+  const navigate = useNavigate()
   const {
     register, formState: { errors }, handleSubmit, reset, control,
   } = useForm()
@@ -56,6 +57,10 @@ function Transform() {
     </Box>
   );
 
+  const createTransform = () => {
+    navigate('/create-transform', { state: { transform: null } })
+  }
+
   return (
     <section className="grid grid-cols-12">
       {/* <IconButton onClick={toggleSlider}>
@@ -72,7 +77,7 @@ function Transform() {
         <p className="text-4xl">Transforms</p>
         <p className="text-md pt-1">Transform / Lists</p>
 
-        <Button variant="contained" className="createButton" onClick={() => openModal()}>Create Transform</Button>
+        <Button variant="contained" className="createButton" onClick={() => createTransform()}>Create Transform</Button>
 
         <TableContainer component={Paper} className="mt-8">
           <Table sx={{ minWidth: 450 }} aria-label="simple table">

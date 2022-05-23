@@ -70,7 +70,6 @@ function CreateSource(props) {
         }
       }
     } catch (e) {
-      console.log(e)
       return toast.error(`Error`)
     }
   }

@@ -1,22 +1,78 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
+import axios from 'axios'
 
 import {
-  Stack, TextField, InputAdornment, Button, Box, List, ListItem, ListItemText, IconButton, Drawer,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, DataGrid
+  Stack, TextField, Button, Box, List, ListItem, ListItemText, LinearProgress
 } from '@mui/material'
+import { ToastContainer, toast } from 'react-toastify'
 
 import Sidebar from '../../component/Sidebar'
 
 import '../../assets/css/System.css';
+import 'react-toastify/dist/ReactToastify.min.css'
+
+const SERVICE = process.env.REACT_APP_SERVICE
 
 function CreateDestination() {
+  const navigate = useNavigate()
   const {
     register, formState: { errors }, handleSubmit, reset, control,
   } = useForm()
-  const onSubmit = (data) => {
-    console.log(data)
+  const onSubmit = async (data) => {
+    const destinationData = {
+      host: data.host,
+      tag: data.tag,
+      user: data.user,
+      port: parseInt(data.port),
+      password: data.password,
+      database: data.database,
+      tablename: data.tablename,
+      engine: data.engine,
+    }
+
+    try {
+      const token = localStorage.getItem("cookies");
+      if (!token) {
+        navigate('/')
+      }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      axios.defaults.withCredentials = true
+
+      const destination = location.state.destination
+      if (destination === null) {
+        const res = await axios.post(`${SERVICE}/dests/create`, destinationData)
+        if (res.status === 200) {
+          toast.success(`Creare Destination Success`, {
+            position: "bottom-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            progress: undefined,
+          })
+          reset()
+        } else {
+          return toast.error(`Error`)
+        }
+      } else {
+        const res = await axios.post(`${SERVICE}/dests/update/${destination.id}`, destinationData)
+        if (res.status === 200) {
+          toast.success(`Edit Destination Success`, {
+            position: "bottom-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            progress: undefined,
+          })
+        } else {
+          return toast.error(`Error`)
+        }
+      }
+    } catch (e) {
+      console.log(e)
+      return toast.error(`Error`)
+    }
   }
 
   const location = useLocation()
@@ -49,13 +105,17 @@ function CreateDestination() {
   const [password, setPassword] = useState('')
   const [database, setDatabase] = useState('')
   const [tablename, setTablename] = useState('')
-  const [engine, setEngine] = useState('pg')
+  const [engine, setEngine] = useState('PG')
 
   const [isLoad, setIsLoad] = useState(false)
 
   const toggleSlider = () => {
     setOpen(!open);
   };
+
+  const backButtonHandler = () => {
+    navigate('/destination')
+  }
 
   const sideList = () => (
     <Box component="div">
@@ -301,23 +361,33 @@ function CreateDestination() {
               </div>
             </div>
 
-            <div className="mt-4">
+            <Stack className="mt-4 float-right" direction="row" spacing={2}>
+              <Button
+                variant="contained"
+                className="float-right"
+                onClick={() => backButtonHandler()}
+              >
+                Back
+              </Button>
               <Button
                 variant="contained"
                 className="float-right"
                 onClick={handleSubmit(onSubmit)}
               >
-                Create Destination
-            </Button>
-            </div>
+                {header} Destination
+              </Button>
+            </Stack>
           </form>
         </div>
+        <ToastContainer position="bottom-right" />
       </section>
     );
   } else {
     return (
-      <>
-      </>
+      <section className="w-full pt-1">
+        <LinearProgress />
+        <ToastContainer position="bottom-right" />
+      </section>
     )
   }
 }

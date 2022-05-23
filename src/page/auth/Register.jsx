@@ -52,6 +52,7 @@ function Register() {
         progress: undefined,
         })
     } catch (e) {
+      console.log(e)
       return toast.error(`Error`)
     }
   }

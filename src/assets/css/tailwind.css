@@ -16,6 +16,6 @@ button {
     font-family: Prompt !important;
 }
 
-td, th, li, div {
+td, th, li, div, p, h2 {
     font-family: Prompt !important;
 }

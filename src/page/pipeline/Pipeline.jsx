@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
+import axios from 'axios'
 
 import {
-  Button, Box, List, ListItem, ListItemText,
+  Button, Box, List, ListItem, ListItemText, IconButton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, LinearProgress
 } from '@mui/material'
+import { ToastContainer, toast } from 'react-toastify'
+
+import {
+  Edit, Delete,
+} from '@mui/icons-material'
 
 import Sidebar from '../../component/Sidebar'
 import CreatePipelineModal from './CreatePipelineModal'
 
 import '../../assets/css/System.css';
+import 'react-toastify/dist/ReactToastify.min.css'
+
+const SERVICE = process.env.REACT_APP_SERVICE
 
 function Pipeline() {
+  const navigate = useNavigate()
   const {
     register, formState: { errors }, handleSubmit, reset, control,
   } = useForm()
@@ -25,72 +36,14 @@ function Pipeline() {
   const closeModal = () => setIsModalOpen(false)
 
   const [open, setOpen] = useState(false);
-  const [destinationList, setDestinationList] = useState([
-    {
-      id: 1,
-      host: 'localhost',
-      tag: 'postgres-local',
-      user: 'postgres',
-      port: '5432',
-      password: 'docker',
-      database: 'postgres',
-      tablename: 'contacts',
-      engine: 'pg',
-    },
-    {
-      id: 2,
-      host: 'localhost',
-      tag: 'postgres-local',
-      user: 'postgres',
-      port: '5432',
-      password: 'docker',
-      database: 'postgres',
-      tablename: 'contacts',
-      engine: 'pg',
-    },
-  ]);
+  const [destinationList, setDestinationList] = useState([]);
 
-  const [sourceList, setSourceList] = useState([
-    {
-      id: 1,
-      host: 'localhost',
-      tag: 'postgres-local1',
-      user: 'postgres',
-      port: '5432',
-      password: 'docker',
-      database: 'postgres',
-      tablename: 'contacts',
-      engine: 'pg',
-    },
-    {
-      id: 2,
-      host: 'localhost',
-      tag: 'postgres-local2',
-      user: 'postgres',
-      port: '5432',
-      password: 'docker',
-      database: 'postgres',
-      tablename: 'contacts',
-      engine: 'pg',
-    },
-  ]);
+  const [sourceList, setSourceList] = useState([]);
 
-  const [pipelineList, setPipelineList] = useState([
-    {
-      id: 1,
-      dest: 1,
-      source: 1,
-      tag: 'pipeline-1',
-      isSensitive: true,
-    },
-    {
-      id: 2,
-      dest: 2,
-      source: 2,
-      tag: 'pipeline-2',
-      isSensitive: true,
-    },
-  ]);
+  const [pipelineList, setPipelineList] = useState([]);
+  const [pipelineTemp, setPipelineTemp] = useState(null);
+
+  const [isLoad, setIsLoad] = useState(false)
 
   const toggleSlider = () => {
     setOpen(!open);
@@ -106,9 +59,49 @@ function Pipeline() {
     </Box>
   );
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const token = localStorage.getItem("cookies");
+        if (!token) {
+          navigate('/')
+        }
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        axios.defaults.withCredentials = true
+
+        const sourceRes = await axios.get(`${SERVICE}/sources/list`)
+        if (sourceRes.status === 200) {
+          setSourceList(sourceRes.data)
+        } else {
+          toast.error(`Get Source Error`)
+        }
+
+        const destinationRes = await axios.get(`${SERVICE}/dests/list`)
+        if (destinationRes.status === 200) {
+          setDestinationList(destinationRes.data)
+        } else {
+          toast.error(`Get Destination Error`)
+        }
+
+        const pipelineRes = await axios.get(`${SERVICE}/pipelines/list`)
+        if (pipelineRes.status === 200) {
+          setPipelineList(pipelineRes.data)
+        } else {
+          toast.error(`Get Pipeline Error`)
+        }
+
+        setIsLoad(true)
+      } catch (e) {
+        console.log(e)
+        toast.error(`Error`)
+      }
+    }
+    fetchData()
+  }, [])
+
   const getSourceTag = (id) => {
-    for (let i = 0; i < sourceList.length; i++){
-      if (sourceList[i].id === id){
+    for (let i = 0; i < sourceList.length; i++) {
+      if (sourceList[i].id === id) {
         return sourceList[i].tag
       }
     }
@@ -116,8 +109,8 @@ function Pipeline() {
   }
 
   const getDestinationDatabase = (id) => {
-    for (let i = 0; i < destinationList.length; i++){
-      if (destinationList[i].id === id){
+    for (let i = 0; i < destinationList.length; i++) {
+      if (destinationList[i].id === id) {
         return destinationList[i].database
       }
     }
@@ -125,8 +118,8 @@ function Pipeline() {
   }
 
   const getDestinationTag = (id) => {
-    for (let i = 0; i < destinationList.length; i++){
-      if (destinationList[i].id === id){
+    for (let i = 0; i < destinationList.length; i++) {
+      if (destinationList[i].id === id) {
         return destinationList[i].tag
       }
     }
@@ -134,70 +127,109 @@ function Pipeline() {
   }
 
   const getSourceDatabase = (id) => {
-    for (let i = 0; i < sourceList.length; i++){
-      if (sourceList[i].id === id){
+    for (let i = 0; i < sourceList.length; i++) {
+      if (sourceList[i].id === id) {
         return sourceList[i].database
       }
     }
     return ''
   }
 
-  return (
-    <section className="grid grid-cols-12">
-      {/* <IconButton onClick={toggleSlider}>
+  const createPipeline = async (data) => {
+    try {
+      const token = localStorage.getItem("cookies");
+      if (!token) {
+        navigate('/')
+      }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      axios.defaults.withCredentials = true
+
+      const pipelineData = {
+        tag: data.tag,
+        source: data.source,
+        dest: data.destination
+      }
+      const res = await axios.post(`${SERVICE}/pipelines/create`, pipelineData)
+      if (res.status === 200) {
+        const newList = [...pipelineList]
+        newList.push(res.data)
+        setPipelineList(newList)
+        toast.success(`Create Pipeline Success`)
+      } else {
+        toast.error(`Create Pipeline Error`)
+      }
+
+    } catch (e) {
+      console.log(e)
+      toast.error(`Error`)
+    }
+  }
+
+  if (isLoad) {
+    return (
+      <section className="grid grid-cols-12">
+        {/* <IconButton onClick={toggleSlider}>
         <MenuIcon />
       </IconButton>
       <Drawer open={open} onClose={toggleSlider}>
         {sideList()}
       </Drawer> */}
 
-      <div className="hidden md:flex md:col-span-3 lg:col-span-2 xl:col-span-2">
-        <Sidebar page={`pipeline`} />
-      </div>
-      <div className="contentBox">
-        <p className="text-4xl">Pipelines</p>
-        <p className="text-md pt-1">Pipeline / Lists</p>
+        <div className="hidden md:flex md:col-span-3 lg:col-span-2 xl:col-span-2">
+          <Sidebar page={`pipeline`} />
+        </div>
+        <div className="contentBox">
+          <p className="text-4xl">Pipelines</p>
+          <p className="text-md pt-1">Pipeline / Lists</p>
 
-        <Button variant="contained" className="createButton" onClick={() => openModal()}>Create Pipeline</Button>
+          <Button variant="contained" className="createButton" onClick={() => openModal()}>Create Pipeline</Button>
 
-        <TableContainer component={Paper} className="mt-8">
-          <Table sx={{ minWidth: 450 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Pipeline Tag</TableCell>
-                <TableCell>Source Tag</TableCell>
-                <TableCell>Source Database</TableCell>
-                <TableCell>Destination Tag</TableCell>
-                <TableCell>Destination Database</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {pipelineList.map((row, index) => (
-                <TableRow
-                  key={`pipelineList-${index}`}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.tag}
-                  </TableCell>
-                  <TableCell>{getSourceTag(row.source)}</TableCell>
-                  <TableCell>{getSourceDatabase(row.source)}</TableCell>
-                  <TableCell>{getDestinationTag(row.dest)}</TableCell>
-                  <TableCell>{getDestinationDatabase(row.dest)}</TableCell>
+          <TableContainer component={Paper} className="mt-8">
+            <Table sx={{ minWidth: 450 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Pipeline Tag</TableCell>
+                  <TableCell>Source Tag</TableCell>
+                  <TableCell>Source Database</TableCell>
+                  <TableCell>Destination Tag</TableCell>
+                  <TableCell>Destination Database</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </div>
-      <CreatePipelineModal 
-        isOpen={isModalOpen}
-        handleClose={() => closeModal()}
-        sourceList={sourceList}
-        destinationList={destinationList}
-      />
+              </TableHead>
+              <TableBody>
+                {pipelineList.map((row, index) => (
+                  <TableRow
+                    key={`pipelineList-${index}`}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row.tag}
+                    </TableCell>
+                    <TableCell>{getSourceTag(row.source)}</TableCell>
+                    <TableCell>{getSourceDatabase(row.source)}</TableCell>
+                    <TableCell>{getDestinationTag(row.dest)}</TableCell>
+                    <TableCell>{getDestinationDatabase(row.dest)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+        <CreatePipelineModal
+          isOpen={isModalOpen}
+          handleClose={() => closeModal()}
+          sourceList={sourceList}
+          destinationList={destinationList}
+          toast={toast}
+          createPipeline={(data) => createPipeline(data)}
+        />
+      </section>
+    );
+  } else {
+    <section className="w-full pt-1">
+      <LinearProgress />
+      <ToastContainer position="bottom-right" />
     </section>
-  );
+  }
 }
 
 export default Pipeline;

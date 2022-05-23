@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import axios from 'axios'
 
 import {
-  Stack, TextField, InputAdornment, Button, Box, List, ListItem, ListItemText, IconButton, Drawer,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, DataGrid
+  Stack, TextField, Button, Box, List, ListItem, ListItemText, LinearProgress
 } from '@mui/material'
 import { ToastContainer, toast } from 'react-toastify'
 
@@ -66,7 +65,6 @@ function CreateSource(props) {
             closeOnClick: true,
             progress: undefined,
           })
-          reset()
         } else {
           return toast.error(`Error`)
         }
@@ -371,14 +369,14 @@ function CreateSource(props) {
                 onClick={() => backButtonHandler()}
               >
                 Back
-            </Button>
+              </Button>
               <Button
                 variant="contained"
                 className="float-right"
                 onClick={handleSubmit(onSubmit)}
               >
                 {header} Source
-            </Button>
+              </Button>
             </Stack>
           </form>
         </div>
@@ -387,8 +385,10 @@ function CreateSource(props) {
     );
   } else {
     return (
-      <>
-      </>
+      <section className="w-full pt-1">
+        <LinearProgress />
+        <ToastContainer position="bottom-right" />
+      </section>
     )
   }
 }

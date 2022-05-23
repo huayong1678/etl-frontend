@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
+import axios from 'axios'
 
 import { styled, Box } from '@mui/system'
 import {
@@ -12,6 +14,8 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import ModalUnstyled from '@mui/base/ModalUnstyled'
 
 import '../../assets/css/System.css';
+
+const SERVICE = process.env.REACT_APP_SERVICE
 
 const Backdrop = styled('div')`
   z-index: -10;
@@ -52,34 +56,19 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
   },
 }))
 
-const eatingFoodTypeList = [
-  '',
-  'อาหารปกติ',
-  'อาหารปั่น',
-]
-
-const eatingTypeList = [
-  '',
-  'Feed',
-  'ป้อน',
-  'ทานเอง',
-]
-
 function CreatePipelineModal(props) {
   const {
     register, formState: { errors }, handleSubmit, reset, control,
   } = useForm()
   const onSubmit = (data) => {
-    console.log(data)
+    createPipeline(data)
+    reset()
+    closeModal()
   }
 
   const {
-    handleClose, isOpen, sourceList, destinationList,
+    handleClose, isOpen, sourceList, destinationList, createPipeline,
   } = props
-
-  useEffect(() => {
-
-  }, [])
 
   const [tag, setTag] = useState('')
   const [source, setSource] = useState('')

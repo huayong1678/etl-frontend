@@ -6,11 +6,12 @@ import axios from 'axios'
 import {
   Button, Box, List, ListItem, ListItemText, IconButton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, LinearProgress
 } from '@mui/material'
 import { ToastContainer, toast } from 'react-toastify'
 
 import {
-  CalendarToday, MedicalServices, Edit, Delete, Add,
+  Edit, Delete,
 } from '@mui/icons-material'
 
 import Sidebar from '../../component/Sidebar'
@@ -24,7 +25,11 @@ function Source() {
   const navigate = useNavigate()
 
   const [open, setOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [sourceList, setSourceList] = useState([]);
+  const [sourceTemp, setSourceTemp] = useState(null);
+
   const [isLoad, setIsLoad] = useState(false)
 
   const toggleSlider = () => {
@@ -71,6 +76,46 @@ function Source() {
 
   const editSource = (index) => {
     navigate('/create-source', { state: { source: sourceList[index] } })
+  }
+
+  const deleteSource = async () => {
+    try {
+      const token = localStorage.getItem("cookies");
+      if (!token) {
+        navigate('/')
+      }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      axios.defaults.withCredentials = true
+      const res = await axios.get(`${SERVICE}/sources/delete/${sourceTemp.id}`)
+      if (res.status === 200) {
+        const newList = [...sourceList]
+        newList.splice(sourceList.indexOf(sourceTemp), 1)
+        setSourceList(newList)
+
+        toast.success(`Delete Source Success`, {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          progress: undefined,
+        })
+
+        closeDialog()
+      } else {
+        toast.error(`Error`)
+      }
+    } catch (e) {
+      toast.error(`Error`)
+    }
+  }
+
+  const openDialog = (item) => {
+    setSourceTemp(item)
+    setIsDialogOpen(true)
+  }
+
+  const closeDialog = () => {
+    setIsDialogOpen(false)
   }
 
   if (isLoad) {
@@ -130,7 +175,7 @@ function Source() {
                         aria-label="close"
                         className="tableDeleteIcon"
                         size="small"
-                        onClick={() => console.log("delete")}
+                        onClick={() => openDialog(row)}
                       >
                         <Delete fontSize="inherit" />
                       </IconButton>
@@ -142,12 +187,55 @@ function Source() {
           </TableContainer>
         </div>
         <ToastContainer position="bottom-right" />
+        {sourceTemp !== null ? (
+          <Dialog
+            open={isDialogOpen}
+            onClose={closeDialog}
+          >
+            <DialogTitle>
+              {'Are you sure that you want to delete this source?'}
+            </DialogTitle>
+            <DialogContent>
+              <div className="grid grid-cols-12 text-center">
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Host : ${sourceTemp.host}`}
+                </DialogContentText>
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Tag : ${sourceTemp.tag}`}
+                </DialogContentText>
+              </div>
+
+              <div className="grid grid-cols-12 text-center">
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Database : ${sourceTemp.database}`}
+                </DialogContentText>
+                <DialogContentText className="col-span-12 sm:col-span-6">
+                  {`Tablename : ${sourceTemp.tablename}`}
+                </DialogContentText>
+              </div>
+
+              <div className="grid grid-cols-12 text-center">
+                <DialogContentText className="col-span-12">
+                  {`Engine : ${sourceTemp.engine}`}
+                </DialogContentText>
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => closeDialog()}>Disagree</Button>
+              <Button onClick={() => deleteSource()} autoFocus>
+                Agree
+              </Button>
+            </DialogActions>
+          </Dialog>
+        ) : null}
       </section>
     );
   } else {
     return (
-      <>
-      </>
+      <section className="w-full pt-1">
+        <LinearProgress />
+        <ToastContainer position="bottom-right" />
+      </section>
     )
   }
 }

@@ -37,6 +37,7 @@ function Login() {
         return toast.error(`Error`)
       }
     } catch (e) {
+      console.log(e)
       return toast.error(`Error`)
     }
   }

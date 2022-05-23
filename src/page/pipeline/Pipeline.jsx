@@ -24,12 +24,6 @@ const SERVICE = process.env.REACT_APP_SERVICE
 
 function Pipeline() {
   const navigate = useNavigate()
-  const {
-    register, formState: { errors }, handleSubmit, reset, control,
-  } = useForm()
-  const onSubmit = (data) => {
-    console.log(data)
-  }
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const openModal = () => setIsModalOpen(true)
@@ -96,7 +90,6 @@ function Pipeline() {
 
         setIsLoad(true)
       } catch (e) {
-        console.log(e)
         toast.error(`Error`)
       }
     }
@@ -198,7 +191,6 @@ function Pipeline() {
         return toast.error(`Error`)
       }
     } catch (e) {
-      console.log(e)
       return toast.error(`Error`)
     }
   }
@@ -230,7 +222,6 @@ function Pipeline() {
         toast.error(`Error`)
       }
     } catch (e) {
-      console.log(e)
       toast.error(`Error`)
     }
   }
@@ -248,7 +239,7 @@ function Pipeline() {
     return (
       <section className="grid grid-cols-12">
         {/* <IconButton onClick={toggleSlider}>
-        <MenuIcon />
+        <MenuIcon />isFetch
       </IconButton>
       <Drawer open={open} onClose={toggleSlider}>
         {sideList()}

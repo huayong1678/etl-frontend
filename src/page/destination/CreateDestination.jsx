@@ -70,7 +70,6 @@ function CreateDestination() {
         }
       }
     } catch (e) {
-      console.log(e)
       return toast.error(`Error`)
     }
   }

@@ -10,6 +10,7 @@ import CreateDestinationPage from './page/destination/CreateDestination'
 import PipelinePage from './page/pipeline/Pipeline'
 import TransformPage from './page/transform/Transform'
 import CreateTranformPage from './page/transform/CreateTranform'
+import RunTranformPage from './page/transform/RunTranform'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/pipeline" element={<PipelinePage />} /> 
       <Route path="/transform" element={<TransformPage />} /> 
       <Route path="/create-transform" element={<CreateTranformPage />} /> 
+      <Route path="/execute-transform" element={<RunTranformPage />} /> 
     </Routes>
   );
 }

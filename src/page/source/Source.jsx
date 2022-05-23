@@ -57,14 +57,12 @@ function Source() {
         axios.defaults.withCredentials = true
         const res = await axios.get(`${SERVICE}/sources/list`)
         if (res.status === 200) {
-          console.log(res.data)
           setSourceList(res.data)
           setIsLoad(true)
         } else {
           toast.error(`Error`)
         }
       } catch (e) {
-        console.log(e)
         toast.error(`Error`)
       }
     }

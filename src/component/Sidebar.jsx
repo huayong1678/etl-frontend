@@ -1,26 +1,47 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm, Controller } from 'react-hook-form'
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
 
 import {
-  Stack, TextField, InputAdornment, Button, Box, List, ListItem, ListItemText, IconButton, Drawer, buttonBaseClasses
-} from '@mui/material'
+  Stack,
+  TextField,
+  InputAdornment,
+  Button,
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Drawer,
+  buttonBaseClasses,
+} from "@mui/material";
 
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from "@mui/icons-material/Logout";
 
-import '../assets/css/Sidebar.css';
+import "../assets/css/Sidebar.css";
+
+const SERVICE = process.env.REACT_APP_SERVICE;
 
 function Sidebar(props) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const toggleSlider = () => {
     setOpen(!open);
   };
 
-  const logout = () => {
-    navigate('/')
-  }
+  const logout = async () => {
+    const token = localStorage.getItem("cookies");
+    if (!token) {
+      navigate("/");
+    }
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    axios.defaults.withCredentials = true;
+    const res = await axios.post(`${SERVICE}/users/logout`);
+
+    navigate("/");
+  };
 
   const sideList = () => (
     <Box component="div">
@@ -42,7 +63,7 @@ function Sidebar(props) {
         {sideList()}
       </Drawer> */}
         <Stack className="pt-28">
-          {props.page === 'pipeline' ? (
+          {props.page === "pipeline" ? (
             <div className="selectedButton">
               <p className="text-2xl py-4 pl-12">Pipeline</p>
             </div>
@@ -52,7 +73,7 @@ function Sidebar(props) {
             </Link>
           )}
 
-          {props.page === 'source' ? (
+          {props.page === "source" ? (
             <div className="selectedButton">
               <p className="text-2xl py-4 pl-12">Sources</p>
             </div>
@@ -62,7 +83,7 @@ function Sidebar(props) {
             </Link>
           )}
 
-          {props.page === 'destination' ? (
+          {props.page === "destination" ? (
             <div className="selectedButton">
               <p className="text-2xl py-4 pl-12">Destination</p>
             </div>
@@ -72,7 +93,7 @@ function Sidebar(props) {
             </Link>
           )}
 
-          {props.page === 'transform' ? (
+          {props.page === "transform" ? (
             <div className="selectedButton">
               <p className="text-2xl py-4 pl-12">Transform</p>
             </div>
@@ -82,15 +103,14 @@ function Sidebar(props) {
             </Link>
           )}
         </Stack>
-        
+
         <button className="logoutButton" onClick={() => logout()}>
           <Stack direction="row" className="mx-auto">
             <LogoutIcon />
             <p className="text-lg pl-2">Logout</p>
           </Stack>
         </button>
-
-      </section >
+      </section>
     </>
   );
 }

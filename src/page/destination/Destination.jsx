@@ -63,7 +63,6 @@ function Destination() {
           toast.error(`Error`)
         }
       } catch (e) {
-        console.log(e)
         toast.error(`Error`)
       }
     }
@@ -105,7 +104,6 @@ function Destination() {
         toast.error(`Error`)
       }
     } catch (e) {
-      console.log(e)
       toast.error(`Error`)
     }
   }

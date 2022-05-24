@@ -148,6 +148,24 @@ resource "aws_s3_object" "fonts-woff2" {
   content_type = "font/woff2"
 }
 
+resource "aws_s3_object" "txt" {
+  for_each     = fileset("../build/", "**/*.txt")
+  bucket       = aws_s3_bucket.frontend-bucket.bucket
+  key          = each.value
+  source       = "../build/${each.value}"
+  etag         = filemd5("../build/${each.value}")
+  content_type = "text/plain"
+}
+
+resource "aws_s3_object" "json" {
+  for_each     = fileset("../build/", "**/*.json*")
+  bucket       = aws_s3_bucket.frontend-bucket.bucket
+  key          = each.value
+  source       = "../build/${each.value}"
+  etag         = filemd5("../build/${each.value}")
+  content_type = "application/json"
+}
+
 resource "aws_cloudfront_origin_access_identity" "origin-access-identity" {
   comment = "S3 OAI for Web Hosting"
 }

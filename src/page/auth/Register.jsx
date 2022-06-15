@@ -43,6 +43,7 @@ function Register() {
     }
 
     try {
+      console.log(`${SERVICE}/users/register`)
       const res = await axios.post(`${SERVICE}/users/register`, registerData)
       toast.success(`Register Success`, {
         position: "bottom-right",

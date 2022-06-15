@@ -61,14 +61,17 @@ function Pipeline() {
     async function fetchData() {
       try {
         const token = localStorage.getItem("cookies");
+        console.log(token)
         if (!token) {
           navigate('/')
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
         axios.defaults.withCredentials = true
 
+        console.log('0')
         const sourceRes = await axios.get(`${SERVICE}/sources/list`)
         if (sourceRes.status === 200) {
+          console.log('1')
           setSourceList(sourceRes.data)
         } else {
           toast.error(`Get Source Error`)
@@ -76,6 +79,7 @@ function Pipeline() {
 
         const destinationRes = await axios.get(`${SERVICE}/dests/list`)
         if (destinationRes.status === 200) {
+          console.log('2')
           setDestinationList(destinationRes.data)
         } else {
           toast.error(`Get Destination Error`)
@@ -83,6 +87,7 @@ function Pipeline() {
 
         const pipelineRes = await axios.get(`${SERVICE}/pipelines/list`)
         if (pipelineRes.status === 200) {
+          console.log('3')
           setPipelineList(pipelineRes.data)
         } else {
           toast.error(`Get Pipeline Error`)
@@ -90,6 +95,7 @@ function Pipeline() {
 
         setIsLoad(true)
       } catch (e) {
+        console.log(e)
         toast.error(`Error`)
       }
     }

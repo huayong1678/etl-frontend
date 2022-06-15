@@ -32,6 +32,7 @@ function Sidebar(props) {
   };
 
   const logout = async () => {
+    console.log('logout')
     const token = localStorage.getItem("cookies");
     if (!token) {
       navigate("/");
@@ -104,7 +105,7 @@ function Sidebar(props) {
           )}
         </Stack>
 
-        <button className="logoutButton" onClick={() => logout()}>
+        <button className="logoutButton" variant="text" onClick={() => logout()}>
           <Stack direction="row" className="mx-auto">
             <LogoutIcon />
             <p className="text-lg pl-2">Logout</p>

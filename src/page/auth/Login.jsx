@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
+import Cookies from 'js-cookie'
 
 import {
   Stack, TextField, InputAdornment, Button,
@@ -32,6 +33,7 @@ function Login() {
       if (res.data.message === 'success') {
         localStorage.removeItem("cookies");
         localStorage.setItem('cookies', res.data.jwt)
+        Cookies.set('jwt', res.data.jwt)
         navigate('/pipeline')
       } else {
         return toast.error(`Error`)
